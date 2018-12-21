@@ -69,6 +69,8 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 response.headers().set(HttpHeaderNames.CONTENT_LENGTH, file.length());
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
             }
+
+            response.headers().set("author", "simon.zhang(812135023@qq.com)");
             ctx.write(response);
 
             if (ctx.pipeline().get(SslHandler.class) == null) {

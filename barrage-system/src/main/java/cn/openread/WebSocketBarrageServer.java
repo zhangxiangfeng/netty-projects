@@ -45,6 +45,7 @@ public class WebSocketBarrageServer {
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
             System.out.println(this.getClass().toGenericString() + " bind on port " + this.port);
+            System.out.println("Access Address => http://127.0.0.1:" + port + "");
 
             // 绑定端口，开始接收进来的连接
             ChannelFuture f = b.bind(port).sync();
@@ -69,6 +70,8 @@ public class WebSocketBarrageServer {
             pipeline.addLast("http-aggregator", new HttpObjectAggregator(65535));
             pipeline.addLast("http-encodec", new HttpResponseEncoder());
             pipeline.addLast("http-chunked", new ChunkedWriteHandler());
+
+            //http -> web socket
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws"));
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
