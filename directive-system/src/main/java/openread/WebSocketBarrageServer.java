@@ -1,7 +1,5 @@
-package cn.openread;
+package openread;
 
-import cn.openread.core.ServicesDiscoveryThread;
-import cn.openread.core.ServicesRegisterThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,6 +10,8 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import openread.core.ServicesDiscoveryThread;
+import openread.core.ServicesRegisterThread;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
