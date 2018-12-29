@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration name="payment" status="WARN">
+
+    <!--<Configuration status="DEBUG"   monitorInterval="60" name="payment">-->
+    <Properties>
+        <property name="subject">Error Log</property>
+        <property name="smtpDebug">true</property>
+        <property name="smtpUsername">service@www.dtxzw.com</property>
+        <property name="smtpPassword">Aa812135023</property>
+        <property name="to">zhangxiangfeng@kuaicto.com</property>
+        <!--暗抄送,多个逗号分开-->
+        <!--<property name="bcc">812135023@qq.com,error@openread.cn</property>-->
+        <!--正常抄送,多个逗号分开-->
+        <!--<property name="cc">812135023@qq.com,error@openread.cn</property>-->
+        <property name="from">service@www.dtxzw.com</property>
+        <property name="smtpHost">smtp.mxhichina.com</property>
+        <property name="smtpPort">465</property>
+        <property name="smtpProtocol">smtps</property>
+        <property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %c{1.} %M - %msg%n</property>
+        <property name="COLOR_PATTERN">%highlight{ %d [%t] %-5level %c{1.} - %msg%n}{FATAL=Bright Red, ERROR=Bright Red,
+            WARN=Bright Yellow, DEBUG=Bright Green, INFO=Bright Gray,TRACE=Bright White}
+        </property>
+        <property name="path">D:\sudao-projects\payment\data\logs</property>
+    </Properties>
+
+    <Appenders>
+
+        <!--配置控制台的输出-->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout charset="UTF-8" pattern="${pattern}"/>
+        </Console>
+
+        <!--配置重大错误邮件发送-->
+        <!--<SMTP name="Mail" subject="${subject}" to="${to}" smtpDebug="${smtpDebug}" bufferSize="512"-->
+        <!--from="${from}"-->
+        <!--smtpHost="${smtpHost}" smtpPort="${smtpPort}" smtpUsername="${smtpUsername}"-->
+        <!--smtpPassword="${smtpPassword}" smtpProtocol="${smtpProtocol}">-->
+        <!--<PatternLayout charset="UTF-8"-->
+        <!--pattern="${pattern}"/>-->
+        <!--</SMTP>-->
+
+        <!--配置基本的日志策略-->
+        <RollingFile name="PlatformRollingFile"
+                     fileName="${path}/platform.log"
+                     filePattern="${path}/$${date:yyyy-MM}/platform-%d{MM-dd-yyyy}-%i.log.gz">
+            <PatternLayout charset="UTF-8"
+                           pattern="${pattern}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="512MB"/>
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+            <!--<AppenderRef ref="PlatformRollingFile"/>-->
+        </Root>
+    </Loggers>
+</Configuration>
+

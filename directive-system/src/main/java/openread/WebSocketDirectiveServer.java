@@ -10,7 +10,9 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import lombok.extern.slf4j.Slf4j;
 import openread.core.ServicesDiscoveryThread;
+import openread.core.ServicesDownThread;
 import openread.core.ServicesRegisterThread;
 
 import java.util.concurrent.CyclicBarrier;
@@ -20,13 +22,18 @@ import java.util.concurrent.ScheduledExecutorService;
 /**
  * 基于WS的弹幕系统
  */
-public class WebSocketBarrageServer {
+@Slf4j
+public class WebSocketDirectiveServer {
+    private static final String appName = "directive-system";
+    private static final String eurekaAddr = "http://127.0.0.1:8761";
+    private static final String localAddr = "127.0.0.1";
+
     private static final CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
     private static final ScheduledExecutorService scheduledExecutorService =
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private int port;
 
-    public WebSocketBarrageServer(int port) {
+    public WebSocketDirectiveServer(int port) {
         this.port = port;
     }
 
@@ -38,16 +45,16 @@ public class WebSocketBarrageServer {
             port = 8080;
         }
 
-        //step 1.启动服务发现
-        ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService);
-        discoveryThread.start();
-
-        //step 2.启动服务注册
-        ServicesRegisterThread servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService);
+        //step 1.启动服务注册
+        ServicesRegisterThread servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr, localAddr);
         servicesRegisterThread.start();
 
+        //step 2.启动服务发现
+        ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr);
+        discoveryThread.start();
+
         //step last.启动netty
-        new WebSocketBarrageServer(port).run();
+        new WebSocketDirectiveServer(port).run();
 
     }
 
@@ -70,9 +77,11 @@ public class WebSocketBarrageServer {
 
             cyclicBarrier.await();
 
-            // 等待服务器  socket 关闭 。
-            f.channel().closeFuture().sync();
-
+            // 等待服务器  socket 关闭
+            f.channel().closeFuture().addListener(future -> {
+                ServicesDownThread servicesDownThread = new ServicesDownThread(scheduledExecutorService);
+                servicesDownThread.start();
+            }).sync();
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
