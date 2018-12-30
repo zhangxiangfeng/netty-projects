@@ -1,5 +1,10 @@
 package cn.openread.enums;
 
+/**
+ * 500类请求处理
+ *
+ * @author Simon
+ */
 public interface IError500Enum<T extends Enum<T>> extends IErrorEnum<T> {
     default Integer configCode() {
         return 500;

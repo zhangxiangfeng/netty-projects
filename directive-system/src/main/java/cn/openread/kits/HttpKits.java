@@ -3,6 +3,11 @@ package cn.openread.kits;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * http请求工具类
+ *
+ * @author Simon
+ */
 public class HttpKits {
     /**
      * 解析出url参数中的键值对

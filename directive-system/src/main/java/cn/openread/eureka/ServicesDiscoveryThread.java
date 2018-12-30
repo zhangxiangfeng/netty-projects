@@ -51,14 +51,14 @@ public class ServicesDiscoveryThread extends Thread {
 
                     HttpResponse httpResponse = HttpRequest.put(url).send();
 
-                    log.debug("服务发现线程,心跳 {},{} 返回状态码 => {} ", eurekaAddr, new Date().toLocaleString(), httpResponse.statusCode());
+                    log.debug("服务发现线程,心跳 {},{} 返回状态码 => {} ", eurekaAddr, new Date().toString(), httpResponse.statusCode());
                 } catch (UnknownHostException e) {
                     log.error(e.getMessage(), e);
                 }
             }), heartBeatTime, heartBeatTime, TimeUnit.SECONDS);
 
         } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
         }
     }
 }

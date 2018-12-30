@@ -78,7 +78,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             //step 2.检测设备重复接入
             Channel channel = MatcherChannelKits.getChannelByNameAndValue(ConstantKits.DEV_ID, devId);
             if (channel != null) {
-                ctx.fireExceptionCaught(new BizHandleException(ErrorEnum.DEV_REPEAT, "设备重复请求长连接 => " + channel.remoteAddress()));
+                ctx.fireExceptionCaught(new BizHandleException(ErrorEnum.DEV_REPEAT, "设备重复请求长连接,源地址 => " + channel.remoteAddress()));
             }
 
             //step 3.设置设备属性

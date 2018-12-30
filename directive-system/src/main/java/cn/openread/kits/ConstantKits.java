@@ -14,7 +14,7 @@ public class ConstantKits {
     /**
      * 存储所有的Channel
      */
-    public static final ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static volatile ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     /**
      * 设备ID

@@ -1,8 +1,12 @@
 package cn.openread;
 
+import cn.openread.dto.MQMsgDTO;
+import cn.openread.kits.MQMsgWrapKits;
+import cn.openread.mq.RedisQueueAPI;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.net.MimeTypes;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.junit.Test;
 
@@ -11,11 +15,45 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 public class SimpleTest {
 
+    private static final String queueName = "SIMON-MQ-DEV";
 
     @Test
-    public void test() throws UnknownHostException {
+    public void test5() throws InterruptedException {
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            if (i % 2 == 0) {
+                RedisQueueAPI.offerQueue(queueName, MQMsgWrapKits.encodeMsg(MQMsgDTO
+                        .builder()
+                        .devId("F0001")
+                        .directive("OPEN_DOOR-" + "F0001")
+                        .build()));
+                Thread.sleep(1000);
+            } else {
+                RedisQueueAPI.offerQueue(queueName, MQMsgWrapKits.encodeMsg(MQMsgDTO
+                        .builder()
+                        .devId("F0002")
+                        .directive("OPEN_DOOR-" + "F0002")
+                        .build()));
+                Thread.sleep(1000);
+            }
+
+        }
+        System.out.println("指令发送完毕");
+    }
+
+    @Test
+    public void test4() throws InterruptedException {
+        while (true) {
+            String result = RedisQueueAPI.takeQueue(queueName);
+            log.debug(result);
+//            Thread.sleep(1000L);
+        }
+    }
+
+    @Test
+    public void test3() throws UnknownHostException {
 
         InetAddress ia = InetAddress.getLocalHost();
         String host = ia.getHostName();//获取计算机主机名

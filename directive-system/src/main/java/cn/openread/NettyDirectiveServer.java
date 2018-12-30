@@ -6,6 +6,7 @@ import cn.openread.eureka.ServicesRegisterThread;
 import cn.openread.handler.HeartBeatServerHandler;
 import cn.openread.handler.HttpRequestHandler;
 import cn.openread.handler.TextWebSocketFrameHandler;
+import cn.openread.mq.RedisQueueListenerThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -25,20 +26,23 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基于WS的弹幕系统
+ * 基于WS的指令系统
+ *
+ * @author Simon
  */
 @Slf4j
-public class WebSocketDirectiveServer {
+public class NettyDirectiveServer {
     private static final String appName = "directive-system";
     private static final String eurekaAddr = "http://127.0.0.1:8761";
     private static final String localAddr = "127.0.0.1";
+    private static final String queueName = "SIMON-MQ-DEV";
 
-    private static final CyclicBarrier cyclicBarrier = new CyclicBarrier(3);
+    private static final CyclicBarrier cyclicBarrier = new CyclicBarrier(4);
     private static final ScheduledExecutorService scheduledExecutorService =
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private int port;
 
-    public WebSocketDirectiveServer(int port) {
+    public NettyDirectiveServer(int port) {
         this.port = port;
     }
 
@@ -58,8 +62,13 @@ public class WebSocketDirectiveServer {
         ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr);
         discoveryThread.start();
 
+
+        //step 3.启动MQ队列监听
+        RedisQueueListenerThread redisQueueListenerThread = new RedisQueueListenerThread(queueName, scheduledExecutorService, cyclicBarrier);
+        redisQueueListenerThread.start();
+
         //step last.启动netty
-        new WebSocketDirectiveServer(port).run();
+        new NettyDirectiveServer(port).run();
 
     }
 
@@ -108,8 +117,8 @@ public class WebSocketDirectiveServer {
             //http -> web socket
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
 
-            //这里表示60秒没收到客户端的发来的数据,就触发函数userEventTriggered
-            pipeline.addLast("ping-pong", new IdleStateHandler(60, 0, 0, TimeUnit.SECONDS));
+            //这里表示600秒没收到客户端的发来的数据,就触发函数userEventTriggered
+            pipeline.addLast("ping-pong", new IdleStateHandler(600, 0, 0, TimeUnit.SECONDS));
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws", true));
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
             pipeline.addLast("heart-beat", new HeartBeatServerHandler());
