@@ -1,5 +1,8 @@
-package openread;
+package cn.openread;
 
+import cn.openread.eureka.ServicesDiscoveryThread;
+import cn.openread.eureka.ServicesDownThread;
+import cn.openread.eureka.ServicesRegisterThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -12,9 +15,6 @@ import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
-import openread.eureka.ServicesDiscoveryThread;
-import openread.eureka.ServicesDownThread;
-import openread.eureka.ServicesRegisterThread;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;

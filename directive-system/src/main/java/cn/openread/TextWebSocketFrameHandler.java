@@ -1,17 +1,16 @@
-package openread;
+package cn.openread;
 
 
+import cn.openread.kits.ConstantKits;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
-import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,7 +23,7 @@ public class TextWebSocketFrameHandler extends
     /**
      * 这里集中存放channel
      */
-    public static ChannelGroup channels = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    public static ChannelGroup channels = ConstantKits.channels;
 
     private static final String URI = "ws";
 
@@ -76,6 +75,8 @@ public class TextWebSocketFrameHandler extends
     protected void channelRead0(ChannelHandlerContext ctx,
                                 Object obj) throws Exception {
         if (obj instanceof HttpRequest) {
+            System.out.println("==================HttpRequest==================");
+
 //            doHandlerHttpRequest(ctx, (HttpRequest) obj);
         } else if (obj instanceof TextWebSocketFrame) {
             Channel incoming = ctx.channel();
@@ -120,15 +121,14 @@ public class TextWebSocketFrameHandler extends
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         Channel incoming = ctx.channel();
-        System.err.println("Client:" + incoming.remoteAddress() + "掉线");
+        log.error("Client:" + incoming.remoteAddress() + "掉线");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         Channel incoming = ctx.channel();
-        System.err.println("Client:" + incoming.remoteAddress() + "异常");
         // 当出现异常就关闭连接
-        cause.printStackTrace();
+        log.error(incoming.remoteAddress() + " =>  " + cause.getMessage(), cause);
         ctx.close();
     }
 

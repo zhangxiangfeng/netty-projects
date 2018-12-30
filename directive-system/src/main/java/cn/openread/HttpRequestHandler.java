@@ -1,5 +1,8 @@
-package openread;
+package cn.openread;
 
+import cn.openread.kits.ChannelAttrKits;
+import cn.openread.kits.HttpKits;
+import cn.openread.kits.MatcherChannelKits;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
@@ -9,6 +12,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
 import java.io.*;
+import java.util.Map;
 
 /**
  * 处理 Http 请求
@@ -54,7 +58,22 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+
         if (request.uri().startsWith(wsUri)) {
+            Map<String, String> stringMap = HttpKits.parseURI(request.uri());
+            for (String key : stringMap.keySet()) {
+                log.debug(" 键值对 => {} - {}", key, stringMap.get(key));
+            }
+
+            //这里判断是否重复请求长链接接入
+            Channel channel = MatcherChannelKits.getChannelByNameAndValue(stringMap.get("devId"));
+            if (channel != null) {
+                log.error("已经存在 => {},设备重复请求长连接,处理结果 => {}", channel.remoteAddress(), "服务器拒绝");
+                ctx.fireExceptionCaught(new Exception("设备重复请求长连接"));
+            }
+
+            ChannelAttrKits.setAttr(ctx.channel(), stringMap.get("devId"));
+
             ctx.fireChannelRead(request.retain());
         } else {
             if (HttpUtil.is100ContinueExpected(request)) {

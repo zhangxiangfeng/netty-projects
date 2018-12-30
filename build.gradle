@@ -1,4 +1,4 @@
-group 'cn.openread'
+group 'cn.cn.openread'
 version '1.0-SNAPSHOT'
 
 subprojects {

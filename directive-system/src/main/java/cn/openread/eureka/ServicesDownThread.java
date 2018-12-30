@@ -1,4 +1,4 @@
-package openread.eureka;
+package cn.openread.eureka;
 
 import lombok.extern.slf4j.Slf4j;
 

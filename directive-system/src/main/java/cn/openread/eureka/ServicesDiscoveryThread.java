@@ -1,4 +1,4 @@
-package openread.eureka;
+package cn.openread.eureka;
 
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;

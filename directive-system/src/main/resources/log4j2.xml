@@ -9,9 +9,9 @@
         <property name="smtpPassword">Aa812135023</property>
         <property name="to">zhangxiangfeng@kuaicto.com</property>
         <!--暗抄送,多个逗号分开-->
-        <!--<property name="bcc">812135023@qq.com,error@openread.cn</property>-->
+        <!--<property name="bcc">812135023@qq.com,error@cn.openread.cn</property>-->
         <!--正常抄送,多个逗号分开-->
-        <!--<property name="cc">812135023@qq.com,error@openread.cn</property>-->
+        <!--<property name="cc">812135023@qq.com,error@cn.openread.cn</property>-->
         <property name="from">service@www.dtxzw.com</property>
         <property name="smtpHost">smtp.mxhichina.com</property>
         <property name="smtpPort">465</property>

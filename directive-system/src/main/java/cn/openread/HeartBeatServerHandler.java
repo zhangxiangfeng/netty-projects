@@ -1,4 +1,4 @@
-package openread;
+package cn.openread;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
