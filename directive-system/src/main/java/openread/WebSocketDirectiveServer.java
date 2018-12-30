@@ -10,14 +10,16 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
-import openread.core.ServicesDiscoveryThread;
-import openread.core.ServicesDownThread;
-import openread.core.ServicesRegisterThread;
+import openread.eureka.ServicesDiscoveryThread;
+import openread.eureka.ServicesDownThread;
+import openread.eureka.ServicesRegisterThread;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 基于WS的弹幕系统
@@ -42,7 +44,7 @@ public class WebSocketDirectiveServer {
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         } else {
-            port = 8080;
+            port = 9090;
         }
 
         //step 1.启动服务注册
@@ -65,7 +67,7 @@ public class WebSocketDirectiveServer {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new WebsocketDanmuServerInitializer())
+                    .childHandler(new WebsocketServerInitializer())
                     //tcp握手队列长度
                     .option(ChannelOption.SO_BACKLOG, 1024)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -89,7 +91,7 @@ public class WebSocketDirectiveServer {
         }
     }
 
-    public static class WebsocketDanmuServerInitializer extends
+    public static class WebsocketServerInitializer extends
             ChannelInitializer<SocketChannel> {
 
         @Override
@@ -103,9 +105,11 @@ public class WebSocketDirectiveServer {
             //http -> web socket
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
 
-            pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws"));
+            //这里表示60秒没收到客户端的发来的数据,就触发函数userEventTriggered
+            pipeline.addLast("ping-pong", new IdleStateHandler(60, 0, 0, TimeUnit.SECONDS));
+            pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws", true));
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
-
+            pipeline.addLast("heart-beat", new HeartBeatServerHandler());
         }
     }
 }

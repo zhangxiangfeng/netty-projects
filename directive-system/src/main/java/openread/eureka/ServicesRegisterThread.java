@@ -1,4 +1,4 @@
-package openread.core;
+package openread.eureka;
 
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
@@ -76,7 +76,7 @@ public class ServicesRegisterThread extends Thread {
                             .header("Content-Type", "application/xml")
                             .bodyText(regXML, MimeTypes.MIME_APPLICATION_XML)
                             .send();
-                    log.info("启动注册Eureka中心,返回状态码=> " + httpResponse.statusCode());
+                    log.info("启动注册Eureka中心,返回状态码 => " + httpResponse.statusCode());
                 } catch (UnknownHostException e) {
                     log.error(e.getMessage(), e);
                 }

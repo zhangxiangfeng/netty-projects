@@ -1,4 +1,4 @@
-package openread.core;
+package openread.eureka;
 
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 @Slf4j
 public class ServicesDiscoveryThread extends Thread {
-    private static final long heartBeatTime = 10;
+    private static final long heartBeatTime = 60;
 
     private CyclicBarrier cyclicBarrier;
     private ScheduledExecutorService scheduledExecutorService;
@@ -51,7 +51,7 @@ public class ServicesDiscoveryThread extends Thread {
 
                     HttpResponse httpResponse = HttpRequest.put(url).send();
 
-                    log.debug("服务发现线程,心跳 =>{}，返回状态码=> {} ", new Date().toLocaleString(), httpResponse.statusCode());
+                    log.debug("服务发现线程,心跳 {},{} 返回状态码 => {} ", eurekaAddr, new Date().toLocaleString(), httpResponse.statusCode());
                 } catch (UnknownHostException e) {
                     log.error(e.getMessage(), e);
                 }

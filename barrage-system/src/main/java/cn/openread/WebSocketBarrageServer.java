@@ -1,7 +1,5 @@
 package cn.openread;
 
-import cn.openread.core.ServicesDiscoveryThread;
-import cn.openread.core.ServicesRegisterThread;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -38,13 +36,13 @@ public class WebSocketBarrageServer {
             port = 8080;
         }
 
-        //step 1.启动服务发现
-        ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService);
-        discoveryThread.start();
-
-        //step 2.启动服务注册
-        ServicesRegisterThread servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService);
-        servicesRegisterThread.start();
+//        //step 1.启动服务发现
+//        ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService);
+//        discoveryThread.start();
+//
+//        //step 2.启动服务注册
+//        ServicesRegisterThread servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService);
+//        servicesRegisterThread.start();
 
         //step last.启动netty
         new WebSocketBarrageServer(port).run();

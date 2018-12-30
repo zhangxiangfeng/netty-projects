@@ -4,6 +4,7 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedNioFile;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
@@ -14,6 +15,7 @@ import java.io.*;
  *
  * @author Simon
  */
+@Slf4j
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> { //1
     private static File INDEX;
 
@@ -32,6 +34,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             OutputStream outStream = new FileOutputStream(targetFile);
             outStream.write(buffer);
             INDEX = targetFile;
+            log.info("静态文件路径 => {}", INDEX.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -51,8 +54,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        System.out.println(request.uri());
-        if (wsUri.equalsIgnoreCase(request.uri())) {
+        if (request.uri().startsWith(wsUri)) {
             ctx.fireChannelRead(request.retain());
         } else {
             if (HttpUtil.is100ContinueExpected(request)) {

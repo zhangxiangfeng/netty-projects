@@ -6,7 +6,7 @@
     <title>barrage-基于Netty弹幕系统</title>
     <style type="text/css">
         body {
-            background: url(http://files.res.openread.cn/39.jpg);
+            background: url(http://files.res.openread.cn/tuzi.jpg);
             no-repeat: top center;
             font-size: 12px;
             font-family: "微软雅黑";
@@ -299,7 +299,8 @@
     var host = window.location.host;
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://" + host + "/ws?devId=F0001");
+        websocket = new WebSocket("ws://" + host + "/ws?devId=F0002");
+        // websocket = new WebSocket("ws://" + host + "/ws");
     } else {
         alert("Not Support WebSocket!");
     }
