@@ -1,6 +1,9 @@
-package cn.openread;
+package cn.openread.handler;
 
+import cn.openread.enums.ErrorEnum;
+import cn.openread.exception.BizHandleException;
 import cn.openread.kits.ChannelAttrKits;
+import cn.openread.kits.ConstantKits;
 import cn.openread.kits.HttpKits;
 import cn.openread.kits.MatcherChannelKits;
 import io.netty.channel.*;
@@ -8,6 +11,7 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedNioFile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
@@ -65,14 +69,20 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 log.debug(" 键值对 => {} - {}", key, stringMap.get(key));
             }
 
-            //这里判断是否重复请求长链接接入
-            Channel channel = MatcherChannelKits.getChannelByNameAndValue(stringMap.get("devId"));
-            if (channel != null) {
-                log.error("已经存在 => {},设备重复请求长连接,处理结果 => {}", channel.remoteAddress(), "服务器拒绝");
-                ctx.fireExceptionCaught(new Exception("设备重复请求长连接"));
+            //step 1.基本参数检查
+            final String devId = stringMap.get(ConstantKits.DEV_ID);
+            if (StringUtils.isBlank(devId)) {
+                ctx.fireExceptionCaught(new BizHandleException(ErrorEnum.MISS_PARAMS_DEV_ID));
             }
 
-            ChannelAttrKits.setAttr(ctx.channel(), stringMap.get("devId"));
+            //step 2.检测设备重复接入
+            Channel channel = MatcherChannelKits.getChannelByNameAndValue(ConstantKits.DEV_ID, devId);
+            if (channel != null) {
+                ctx.fireExceptionCaught(new BizHandleException(ErrorEnum.DEV_REPEAT, "设备重复请求长连接 => " + channel.remoteAddress()));
+            }
+
+            //step 3.设置设备属性
+            ChannelAttrKits.setAttr(ctx.channel(), ConstantKits.DEV_ID, devId);
 
             ctx.fireChannelRead(request.retain());
         } else {

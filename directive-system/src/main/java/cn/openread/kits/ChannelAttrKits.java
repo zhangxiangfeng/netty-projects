@@ -11,9 +11,9 @@ import io.netty.util.AttributeKey;
  */
 public class ChannelAttrKits {
 
-    public static void setAttr(Channel channel, String name) {
+    public static void setAttr(Channel channel, String name, String value) {
         Attribute<String> nameAttr = channel.attr(AttributeKey.valueOf(name));
-        nameAttr.set(name);
+        nameAttr.setIfAbsent(value);
     }
 
     public static String getAttr(Channel channel, String name) {

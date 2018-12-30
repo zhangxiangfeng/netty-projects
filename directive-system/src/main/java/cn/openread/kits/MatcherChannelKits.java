@@ -21,6 +21,7 @@ import java.util.List;
 @Builder
 public class MatcherChannelKits implements ChannelMatcher {
     private String name;
+    private String value;
 
     /**
      * 通过matcher找channel list
@@ -41,8 +42,8 @@ public class MatcherChannelKits implements ChannelMatcher {
         return list;
     }
 
-    public static synchronized Channel getChannelByNameAndValue(String name) {
-        MatcherChannelKits matcher = new MatcherChannelKits(name);
+    public static synchronized Channel getChannelByNameAndValue(String name, String value) {
+        MatcherChannelKits matcher = new MatcherChannelKits(name, value);
         List<Channel> list = getChannelsFromMatcher(matcher);
         if (CollectionUtils.isEmpty(list)) {
             return null;
@@ -54,6 +55,6 @@ public class MatcherChannelKits implements ChannelMatcher {
     @Override
     public boolean matches(Channel channel) {
         String value = ChannelAttrKits.getAttr(channel, name);
-        return StringUtils.equals(this.name, value);
+        return StringUtils.equals(this.value, value);
     }
 }
