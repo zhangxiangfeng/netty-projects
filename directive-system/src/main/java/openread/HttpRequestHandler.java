@@ -51,6 +51,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+        System.out.println(request.uri());
         if (wsUri.equalsIgnoreCase(request.uri())) {
             ctx.fireChannelRead(request.retain());
         } else {
@@ -70,7 +71,6 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
             }
 
-            response.headers().set("author", "simon.zhang(812135023@qq.com)");
             ctx.write(response);
 
             if (ctx.pipeline().get(SslHandler.class) == null) {

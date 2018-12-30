@@ -102,6 +102,7 @@ public class WebSocketDirectiveServer {
 
             //http -> web socket
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
+
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws"));
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
 

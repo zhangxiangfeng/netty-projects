@@ -36,9 +36,6 @@ public class ServicesDiscoveryThread extends Thread {
     public void run() {
         try {
             cyclicBarrier.await();
-            log.debug("=================================================");
-            log.debug("               服务发现线程启动                    ");
-            log.debug("=================================================");
             this.scheduledExecutorService.scheduleAtFixedRate((() -> {
                 try {
                     String url = eurekaAddr + "/eureka/apps/${appName}/${hostname}:${appName}:${port}";
