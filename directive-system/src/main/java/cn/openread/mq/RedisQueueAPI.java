@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 /**
  * 操作redis队列
@@ -14,6 +15,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class RedisQueueAPI {
     private static final String host = "prod-01-redis.frp.openread.cn";
     private static final int port = 10003;
+    private static final int database = 0;
 
     private static volatile JedisPool pool = null;
 
@@ -29,7 +31,7 @@ public class RedisQueueAPI {
             config.setMaxWaitMillis(1000 * 100);
             //在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；
             config.setTestOnBorrow(true);
-            pool = new JedisPool(config, host, port);
+            pool = new JedisPool(config, host, port, Protocol.DEFAULT_TIMEOUT, null, database);
         }
         return pool;
     }

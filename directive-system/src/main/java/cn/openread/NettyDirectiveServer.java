@@ -59,7 +59,6 @@ public class NettyDirectiveServer {
         ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr);
         discoveryThread.start();
 
-
         //step 3.启动MQ队列监听
         RedisQueueListenerThread redisQueueListenerThread = new RedisQueueListenerThread(queueName, scheduledExecutorService, cyclicBarrier);
         redisQueueListenerThread.start();
