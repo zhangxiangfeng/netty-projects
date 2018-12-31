@@ -3,7 +3,6 @@ package cn.openread;
 import cn.openread.eureka.ServicesDiscoveryThread;
 import cn.openread.eureka.ServicesDownThread;
 import cn.openread.eureka.ServicesRegisterThread;
-import cn.openread.handler.HeartBeatServerHandler;
 import cn.openread.handler.HttpRequestHandler;
 import cn.openread.handler.TextWebSocketFrameHandler;
 import cn.openread.mq.RedisQueueListenerThread;
@@ -13,17 +12,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 基于WS的指令系统
@@ -109,19 +106,19 @@ public class NettyDirectiveServer {
         @Override
         public void initChannel(SocketChannel ch) {
             ChannelPipeline pipeline = ch.pipeline();
-            pipeline.addLast("http-decodec", new HttpRequestDecoder());
+            pipeline.addLast("http-decode-encode", new HttpServerCodec());
             pipeline.addLast("http-aggregator", new HttpObjectAggregator(65535));
-            pipeline.addLast("http-encodec", new HttpResponseEncoder());
             pipeline.addLast("http-chunked", new ChunkedWriteHandler());
 
             //http -> web socket
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
 
             //这里表示600秒没收到客户端的发来的数据,就触发函数userEventTriggered
-            pipeline.addLast("ping-pong", new IdleStateHandler(600, 0, 0, TimeUnit.SECONDS));
+//            pipeline.addLast("ping-pong", new IdleStateHandler(600, 0, 0, TimeUnit.SECONDS));
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws", true));
+            pipeline.addLast("ws-compress", new WebSocketServerCompressionHandler());
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
-            pipeline.addLast("heart-beat", new HeartBeatServerHandler());
+//            pipeline.addLast("heart-beat", new HeartBeatServerHandler());
         }
     }
 }

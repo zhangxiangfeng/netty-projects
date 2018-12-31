@@ -14,8 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * 处理TextWebSocketFrame
  */
 @Slf4j
-public class TextWebSocketFrameHandler extends
-        SimpleChannelInboundHandler<TextWebSocketFrame> {
+public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame> {
 
     /**
      * 这里集中存放channel
