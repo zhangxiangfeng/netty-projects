@@ -1,13 +1,12 @@
 package cn.openread.eureka;
 
+import cn.openread.NettyDirectiveServer;
 import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 @Slf4j
 public class ServicesDiscoveryThread extends Thread {
-    private static final long heartBeatTime = 60;
+    private static final long heartBeatTime = 30;
 
     private CyclicBarrier cyclicBarrier;
     private ScheduledExecutorService scheduledExecutorService;
@@ -40,11 +39,10 @@ public class ServicesDiscoveryThread extends Thread {
                 try {
                     String url = eurekaAddr + "/eureka/apps/${appName}/${hostname}:${appName}:${port}";
 
-
                     Map<String, String> paramMap = new HashMap<>(3);
                     paramMap.put("appName", appName);
                     paramMap.put("port", String.valueOf(appPort));
-                    paramMap.put("hostname", InetAddress.getLocalHost().getHostName());
+                    paramMap.put("hostname", "127.0.0.1");
 
                     StringSubstitutor sub = new StringSubstitutor(paramMap);
                     url = sub.replace(url);
@@ -52,7 +50,12 @@ public class ServicesDiscoveryThread extends Thread {
                     HttpResponse httpResponse = HttpRequest.put(url).send();
 
                     log.debug("服务发现线程,心跳 {},{} 返回状态码 => {} ", eurekaAddr, new Date().toString(), httpResponse.statusCode());
-                } catch (UnknownHostException e) {
+
+                    if (httpResponse.statusCode() == 404) {
+                        log.debug("服务自动注册 => {}", eurekaAddr);
+                        NettyDirectiveServer.servicesRegisterThread.run();
+                    }
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
             }), heartBeatTime, heartBeatTime, TimeUnit.SECONDS);

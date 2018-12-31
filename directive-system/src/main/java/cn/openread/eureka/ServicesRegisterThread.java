@@ -7,13 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.*;
 
 /**
  * 服务注册线程
@@ -32,13 +28,12 @@ public class ServicesRegisterThread extends Thread {
     @Override
     public void run() {
         try {
-            cyclicBarrier.await();
+            cyclicBarrier.await(2, TimeUnit.SECONDS);
 
             log.debug("=================================================");
             log.debug("               服务注册线程启动                   ");
             log.debug("=================================================");
             this.scheduledExecutorService.execute(() -> {
-
                 try {
                     String regXML = "<instance>" +
                             "<instanceId>${hostname}:${appName}:${port}</instanceId>" +
@@ -64,7 +59,7 @@ public class ServicesRegisterThread extends Thread {
                     Map<String, String> paramMap = new HashMap<>(4);
                     paramMap.put("appName", appName);
                     paramMap.put("port", String.valueOf(appPort));
-                    paramMap.put("hostname", InetAddress.getLocalHost().getHostName());
+                    paramMap.put("hostname", localAddr);
                     paramMap.put("ip", localAddr);
 
 
@@ -77,14 +72,14 @@ public class ServicesRegisterThread extends Thread {
                             .bodyText(regXML, MimeTypes.MIME_APPLICATION_XML)
                             .send();
                     log.info("启动注册Eureka中心,返回状态码 => " + httpResponse.statusCode());
-                } catch (UnknownHostException e) {
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
 
             });
 
-        } catch (InterruptedException | BrokenBarrierException e) {
-            e.printStackTrace();
+        } catch (InterruptedException | BrokenBarrierException | TimeoutException e) {
+            log.error(e.getMessage(), e);
         }
     }
 }

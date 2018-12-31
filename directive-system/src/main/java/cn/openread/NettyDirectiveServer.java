@@ -38,6 +38,7 @@ public class NettyDirectiveServer {
     private static final ScheduledExecutorService scheduledExecutorService =
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private int port;
+    public static ServicesRegisterThread servicesRegisterThread;
 
     public NettyDirectiveServer(int port) {
         this.port = port;
@@ -52,7 +53,7 @@ public class NettyDirectiveServer {
         }
 
         //step 1.启动服务注册
-        ServicesRegisterThread servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr, localAddr);
+        servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr, localAddr);
         servicesRegisterThread.start();
 
         //step 2.启动服务发现

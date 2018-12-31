@@ -150,7 +150,7 @@
 <body>
 <center>
     <div style="margin-top: 20%">
-        <a href="#" id="startDm" style="font-size: 36px;color: white">开启弹幕,devId=F0002</a>
+        <a href="#" id="startDm" style="font-size: 36px;color: white">开启弹幕,gateway-proxy</a>
     </div>
 
 </center>
@@ -297,10 +297,10 @@
     var index = 0;
 
     var host = window.location.host;
-    host = "192.168.31.6:9090";
+    host = "127.0.0.1:8888";
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://" + host + "/ws?devId=F0002");
+        websocket = new WebSocket("ws://" + host + "/ws?devId=F0000");
         // websocket = new WebSocket("ws://" + host + "/ws");
     } else {
         alert("Not Support WebSocket!");

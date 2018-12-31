@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -150,7 +151,7 @@
 <body>
 <center>
     <div style="margin-top: 20%">
-        <a href="#" id="startDm" style="font-size: 36px;color: white">开启弹幕</a>
+        <a href="#" id="startDm" style="font-size: 36px;color: white">开启弹幕,devId=F0001</a>
     </div>
 
 </center>
@@ -299,7 +300,7 @@
     var host = window.location.host;
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://" + host + "/ws?devId=F0002");
+        websocket = new WebSocket("ws://" + host + "/ws?devId=F0001");
         // websocket = new WebSocket("ws://" + host + "/ws");
     } else {
         alert("Not Support WebSocket!");
