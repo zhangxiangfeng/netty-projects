@@ -300,7 +300,7 @@
     host = "127.0.0.1:9090";
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
-        websocket = new WebSocket("ws://" + host + "/ws");
+        websocket = new WebSocket("ws://" + host + "/ws?devId=F0001");
         // websocket = new WebSocket("ws://" + host + "/ws");
     } else {
         alert("Not Support WebSocket!");

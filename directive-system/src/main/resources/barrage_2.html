@@ -297,7 +297,7 @@
     var index = 0;
 
     var host = window.location.host;
-    host = "192.168.31.6:9090";
+    host = "127.0.0.1:9090";
     //判断当前浏览器是否支持WebSocket
     if ('WebSocket' in window) {
         websocket = new WebSocket("ws://" + host + "/ws?devId=F0002");

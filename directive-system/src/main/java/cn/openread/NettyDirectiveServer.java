@@ -3,6 +3,7 @@ package cn.openread;
 import cn.openread.eureka.ServicesDiscoveryThread;
 import cn.openread.eureka.ServicesDownThread;
 import cn.openread.eureka.ServicesRegisterThread;
+import cn.openread.handler.HeartBeatServerHandler;
 import cn.openread.handler.HttpRequestHandler;
 import cn.openread.handler.TextWebSocketFrameHandler;
 import cn.openread.mq.RedisQueueListenerThread;
@@ -16,11 +17,13 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 基于WS的指令系统
@@ -114,11 +117,11 @@ public class NettyDirectiveServer {
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
 
             //这里表示600秒没收到客户端的发来的数据,就触发函数userEventTriggered
-//            pipeline.addLast("ping-pong", new IdleStateHandler(600, 0, 0, TimeUnit.SECONDS));
+            pipeline.addLast("ping-pong", new IdleStateHandler(20, 0, 0, TimeUnit.SECONDS));
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws", true));
             pipeline.addLast("ws-compress", new WebSocketServerCompressionHandler());
             pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
-//            pipeline.addLast("heart-beat", new HeartBeatServerHandler());
+            pipeline.addLast("heart-beat", new HeartBeatServerHandler());
         }
     }
 }
