@@ -12,10 +12,9 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedNioFile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 
-import java.io.*;
+import java.io.File;
+import java.io.RandomAccessFile;
 import java.util.Map;
 
 /**
@@ -27,26 +26,26 @@ import java.util.Map;
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> { //1
     private static File INDEX;
 
-    static {
-        try {
-            String staticFileName = "barrage.html";
-            ResourceLoader resourceLoader = new DefaultResourceLoader();
-            InputStream inputStream = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + staticFileName).getInputStream();
-
-            String tmpPath = System.getProperty("java.io.tmpdir");
-            byte[] buffer = new byte[inputStream.available()];
-            inputStream.read(buffer);
-            File targetFile = new File(tmpPath + File.separator + staticFileName);
-            if (targetFile.exists())
-                targetFile.delete();
-            OutputStream outStream = new FileOutputStream(targetFile);
-            outStream.write(buffer);
-            INDEX = targetFile;
-            log.info("静态文件路径 => {}", INDEX.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    static {
+//        try {
+//            String staticFileName = "barrage.html";
+//            ResourceLoader resourceLoader = new DefaultResourceLoader();
+//            InputStream inputStream = resourceLoader.getResource(ResourceLoader.CLASSPATH_URL_PREFIX + staticFileName).getInputStream();
+//
+//            String tmpPath = System.getProperty("java.io.tmpdir");
+//            byte[] buffer = new byte[inputStream.available()];
+//            inputStream.read(buffer);
+//            File targetFile = new File(tmpPath + File.separator + staticFileName);
+//            if (targetFile.exists())
+//                targetFile.delete();
+//            OutputStream outStream = new FileOutputStream(targetFile);
+//            outStream.write(buffer);
+//            INDEX = targetFile;
+//            log.info("静态文件路径 => {}", INDEX.getAbsolutePath());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 
     private final String wsUri;

@@ -5,8 +5,9 @@ import cn.openread.eureka.ServicesDownThread;
 import cn.openread.eureka.ServicesRegisterThread;
 import cn.openread.handler.HeartBeatServerHandler;
 import cn.openread.handler.HttpRequestHandler;
-import cn.openread.handler.TextWebSocketFrameHandler;
-import cn.openread.mq.RedisQueueListenerThread;
+import cn.openread.handler.ObjectWebSocketFrameHandler;
+import cn.openread.kits.ChannelAttrKits;
+import cn.openread.kits.ConstantKits;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -14,6 +15,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketServerCompressionHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
@@ -33,11 +36,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class NettyDirectiveServer {
     private static final String appName = "directive-system";
-    private static final String eurekaAddr = "http://127.0.0.1:8761";
+    private static final String eurekaAddr = "http://192.168.1.10:8761";
     private static final String localAddr = "127.0.0.1";
     private static final String queueName = "SIMON-MQ-DEV";
 
-    private static final CyclicBarrier cyclicBarrier = new CyclicBarrier(4);
+    private static final CyclicBarrier cyclicBarrier = new CyclicBarrier(2);
     private static final ScheduledExecutorService scheduledExecutorService =
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors());
     private int port;
@@ -52,9 +55,24 @@ public class NettyDirectiveServer {
         if (args.length > 0) {
             port = Integer.parseInt(args[0]);
         } else {
-            port = 9090;
+            port = 18888;
         }
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                log.debug("进行job运行============>");
 
+                for (Channel channel : ConstantKits.channels) {
+                    log.debug("写内容给=>{}", ChannelAttrKits.getAttr(channel, ConstantKits.DEV_ID));
+
+//                    log.debug("发送PING");
+//                    channel.writeAndFlush(new PingWebSocketFrame());
+                    log.debug("发送PONG");
+                    channel.writeAndFlush(new PongWebSocketFrame());
+                    channel.writeAndFlush(new TextWebSocketFrame("文本内容"));
+                }
+            }
+        }, 1L, 5L, TimeUnit.SECONDS);
         //step 1.启动服务注册
         servicesRegisterThread = new ServicesRegisterThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr, localAddr);
         servicesRegisterThread.start();
@@ -62,10 +80,10 @@ public class NettyDirectiveServer {
         //step 2.启动服务发现
         ServicesDiscoveryThread discoveryThread = new ServicesDiscoveryThread(cyclicBarrier, scheduledExecutorService, appName, port, eurekaAddr);
         discoveryThread.start();
-
-        //step 3.启动MQ队列监听
-        RedisQueueListenerThread redisQueueListenerThread = new RedisQueueListenerThread(queueName, scheduledExecutorService, cyclicBarrier);
-        redisQueueListenerThread.start();
+//
+//        //step 3.启动MQ队列监听
+//        RedisQueueListenerThread redisQueueListenerThread = new RedisQueueListenerThread(queueName, scheduledExecutorService, cyclicBarrier);
+//        redisQueueListenerThread.start();
 
         //step last.启动netty
         new NettyDirectiveServer(port).run();
@@ -89,7 +107,7 @@ public class NettyDirectiveServer {
             // 绑定端口，开始接收进来的连接
             ChannelFuture f = b.bind(port).sync();
 
-            cyclicBarrier.await();
+//            cyclicBarrier.await();
 
             // 等待服务器  socket 关闭
             f.channel().closeFuture().addListener(future -> {
@@ -117,10 +135,10 @@ public class NettyDirectiveServer {
             pipeline.addLast("http-request", new HttpRequestHandler("/ws"));
 
             //这里表示600秒没收到客户端的发来的数据,就触发函数userEventTriggered
-            pipeline.addLast("ping-pong", new IdleStateHandler(20, 0, 0, TimeUnit.SECONDS));
+            pipeline.addLast("ping-pong", new IdleStateHandler(30, 30, 0, TimeUnit.SECONDS));
             pipeline.addLast("WebSocket-protocol", new WebSocketServerProtocolHandler("/ws", true));
             pipeline.addLast("ws-compress", new WebSocketServerCompressionHandler());
-            pipeline.addLast("WebSocket-request", new TextWebSocketFrameHandler());
+            pipeline.addLast("WebSocket-request", new ObjectWebSocketFrameHandler());
             pipeline.addLast("heart-beat", new HeartBeatServerHandler());
         }
     }
